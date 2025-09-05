@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Lelo88/go-mysql-example/database"
+	"github.com/Lelo88/go-mysql-example/handlers"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -14,4 +15,6 @@ func main() {
 	}
 
 	defer db.Close()
+
+	handlers.ListContacts(db)
 }
