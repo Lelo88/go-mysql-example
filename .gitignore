@@ -1,0 +1,11 @@
+# Ignorar archivos de entorno
+.env
+
+# Ignorar dependencias descargadas por Go
+/bin/
+/pkg/
+
+# Ignorar archivos del sistema
+.DS_Store
+.idea/
+.vscode/
