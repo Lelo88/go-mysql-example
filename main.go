@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Lelo88/go-mysql-example/database"
@@ -17,4 +18,7 @@ func main() {
 	defer db.Close()
 
 	handlers.ListContacts(db)
+	fmt.Println("-----")
+	fmt.Println("Get contact with ID 1:")
+	handlers.GetContactByID(db, 1)
 }
