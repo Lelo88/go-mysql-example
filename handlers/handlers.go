@@ -91,3 +91,14 @@ func UpdateContact(db *sql.DB, contact models.Contact) {
 
 	fmt.Println("Contact updated successfully!")
 }
+
+func DeleteContact(db *sql.DB, id int) {
+	query := "DELETE FROM contact WHERE id = ?"
+
+	_, err := db.Exec(query, id)
+	if err != nil {
+		log.Fatal("Could not execute delete query:", err)
+	}
+
+	fmt.Println("Contact deleted successfully!")
+}
