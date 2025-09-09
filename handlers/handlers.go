@@ -80,3 +80,14 @@ func CreateContact(db *sql.DB, contact models.Contact) error {
 	fmt.Println("Contact created successfully!")
 	return nil
 }
+
+func UpdateContact(db *sql.DB, contact models.Contact) {
+	query := "UPDATE contact SET name = ?, email = ?, phone = ? WHERE id = ?"
+
+	_, err := db.Exec(query, contact.Name, contact.Email, contact.Phone, contact.ID)
+	if err != nil {
+		log.Fatal("Could not execute update query:", err)
+	}
+
+	fmt.Println("Contact updated successfully!")
+}
