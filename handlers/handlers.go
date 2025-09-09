@@ -67,3 +67,16 @@ func GetContactByID(db *sql.DB, id int) {
 	fmt.Println("Contact Details:")
 	fmt.Printf("ID: %d, Name: %s, Email: %s, Phone: %s\n", contact.ID, contact.Name, contact.Email, contact.Phone)
 }
+
+func CreateContact(db *sql.DB, contact models.Contact) error {
+	// Implementation for creating a new contact
+	query := "INSERT INTO contact (name, email, phone) VALUES (?, ?, ?)"
+	
+	_, err := db.Exec(query, contact.Name, contact.Email, contact.Phone)
+	if err != nil {
+		return fmt.Errorf("could not execute insert query: %v", err)
+	}
+
+	fmt.Println("Contact created successfully!")
+	return nil
+}
