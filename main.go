@@ -25,13 +25,24 @@ func main() {
 
 	fmt.Println("-----")
 	
-	newContact := models.Contact{
+	/* newContact := models.Contact{
 		Name:  "John Doe",
 		Email: "",
 		Phone: "123-456-7890",
 	}
-	handlers.CreateContact(db, newContact)
+	handlers.CreateContact(db, newContact) */
 
 	fmt.Println("-----")
+	handlers.ListContacts(db)
+
+	fmt.Println("-----")
+	fmt.Println("Update contact with ID 1:")
+	updatedContact := models.Contact{
+		ID:    1,
+		Name:  "Jane Doe",
+		Email: "jane.doe@example.com",
+		Phone: "098-765-4321",
+	}
+	handlers.UpdateContact(db, updatedContact)
 	handlers.ListContacts(db)
 }
