@@ -54,7 +54,7 @@ func isValidEmail(email string) bool {
 	return regexp.MustCompile(emailRegex).MatchString(email)
 }
 
-func GetContactByID(db *sql.DB, id int) {
+func GetContactByID(db *sql.DB, id int) error {
 	// Implementation for getting a contact by ID
 	query := "SELECT * FROM contact WHERE id = ?"
 
@@ -66,10 +66,9 @@ func GetContactByID(db *sql.DB, id int) {
 	err := row.Scan(&contact.ID, &contact.Name, &valueEmail, &contact.Phone)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Println("No contact found with the given ID.")
-			return
+			return fmt.Errorf("no contact found with the given ID: %d", id)
 		}
-		log.Fatal("Could not scan row:", err)
+		return fmt.Errorf("could not scan row: %w", err)
 	}
 
 	if valueEmail.Valid {
@@ -80,6 +79,8 @@ func GetContactByID(db *sql.DB, id int) {
 
 	fmt.Println("Contact Details:")
 	fmt.Printf("ID: %d, Name: %s, Email: %s, Phone: %s\n", contact.ID, contact.Name, contact.Email, contact.Phone)
+
+	return nil
 }
 
 func CreateContact(db *sql.DB, contact models.Contact) error {

@@ -105,4 +105,63 @@ func Test_ListContacts(t *testing.T) {
 		err = mock.ExpectationsWereMet()
 		require.NoError(t, err, "there were unfulfilled expectations")
 	})
+
+	t.Run("Email is NULL", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		row := sqlmock.NewRows([]string{"id", "name", "email", "phone"}).
+			AddRow(1, "John Doe", sql.NullString{String: "", Valid: false}, "123456789")
+
+		mock.ExpectQuery("SELECT \\* FROM contact").WillReturnRows(row)
+
+		err = ListContacts(db)
+		require.NoError(t, err, "unexpected error")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
+	})
+}
+
+func TestGetContactByID(t *testing.T) {
+	t.Run("Contact Found", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		row := sqlmock.NewRows([]string{"id", "name", "email", "phone"}).
+			AddRow(1, "John Doe", "john.doe@example.com", "123456789")
+
+		mock.ExpectQuery("SELECT \\* FROM contact WHERE id = \\?").WithArgs(1).WillReturnRows(row)
+
+		err = GetContactByID(db, 1)
+		require.NoError(t, err, "unexpected error")
+	})
+
+	t.Run("Contact Not Found", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		mock.ExpectQuery("SELECT \\* FROM contact WHERE id = \\?").WithArgs(2).WillReturnError(sql.ErrNoRows)
+
+		err = GetContactByID(db, 2)
+		require.Error(t, err, "expected an error but got none")
+		require.EqualError(t, err, "no contact found with the given ID: 2", "unexpected error message")
+	})
+
+	t.Run("Scan Error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		row := sqlmock.NewRows([]string{"id", "name", "email", "phone"}).
+			AddRow("invalid", "John Doe", "john.doe@example.com", "123456789")
+
+		mock.ExpectQuery("SELECT \\* FROM contact WHERE id = \\?").WithArgs(1).WillReturnRows(row)
+
+		err = GetContactByID(db, 1)
+		require.Error(t, err, "expected an error but got none")
+	})
 }
