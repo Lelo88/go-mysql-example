@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/Lelo88/go-mysql-example/models"
@@ -108,13 +107,14 @@ func UpdateContact(db *sql.DB, contact models.Contact) error {
 	return nil
 }
 
-func DeleteContact(db *sql.DB, id int) {
+func DeleteContact(db *sql.DB, id int) error {
 	query := "DELETE FROM contact WHERE id = ?"
 
 	_, err := db.Exec(query, id)
 	if err != nil {
-		log.Fatal("Could not execute delete query:", err)
+		return fmt.Errorf("could not execute delete query: %w", err)
 	}
 
 	fmt.Println("Contact deleted successfully!")
+	return nil
 }
