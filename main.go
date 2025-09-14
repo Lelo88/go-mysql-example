@@ -24,39 +24,6 @@ func main() {
 
 	defer db.Close()
 
-	/* handlers.ListContacts(db)
-	fmt.Println("-----") */
-	/* fmt.Println("Get contact with ID 1:")
-	handlers.GetContactByID(db, 1)
-
-	fmt.Println("-----") */
-
-	/* newContact := models.Contact{
-		Name:  "John Doe",
-		Email: "",
-		Phone: "123-456-7890",
-	}
-	handlers.CreateContact(db, newContact) */
-
-	/* fmt.Println("-----")
-	handlers.ListContacts(db)
-
-	fmt.Println("-----")
-	fmt.Println("Update contact with ID 1:")
-	updatedContact := models.Contact{
-		ID:    1,
-		Name:  "Jane Doe",
-		Email: "jane.doe@example.com",
-		Phone: "098-765-4321",
-	}
-	handlers.UpdateContact(db, updatedContact)
-	handlers.ListContacts(db) */
-
-	/* fmt.Println("-----")
-	fmt.Println("Delete contact with ID 1:")
-	handlers.DeleteContact(db, 5)
-	handlers.ListContacts(db) */
-
 	for {
 		fmt.Println("\n MENU")
 		fmt.Println("1. List Contacts")
