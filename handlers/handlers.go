@@ -4,17 +4,18 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/Lelo88/go-mysql-example/models"
 )
 
-func ListContacts(db *sql.DB) {
+func ListContacts(db *sql.DB) error {
 	// Implementation for listing contacts
 	query := "SELECT * FROM contact"
 
 	rows, err := db.Query(query)
 	if err != nil {
-		log.Fatal("Could not execute query:", err)
+		return fmt.Errorf("could not execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -25,30 +26,43 @@ func ListContacts(db *sql.DB) {
 
 		var valueEmail sql.NullString
 
-		err := rows.Scan(&contact.ID, &contact.Name, &contact.Email, &contact.Phone)
+		err := rows.Scan(&contact.ID, &contact.Name, &valueEmail, &contact.Phone)
 		if err != nil {
-			log.Fatal("Could not scan row:", err)
+			return fmt.Errorf("could not scan row: %w", err)
 		}
 
 		if valueEmail.Valid {
 			contact.Email = valueEmail.String
+			// Validate email format
+			if !isValidEmail(contact.Email) {
+				return fmt.Errorf("invalid email format: %s", contact.Email)
+			}
 		} else {
 			contact.Email = "No Email"
 		}
 
 		fmt.Printf("ID: %d, Name: %s, Email: %s, Phone: %s\n", contact.ID, contact.Name, contact.Email, contact.Phone)
 	}
+
+	return nil
+}
+
+// isValidEmail checks if an email has a valid format
+func isValidEmail(email string) bool {
+	// Updated regex for stricter email validation
+	const emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	return regexp.MustCompile(emailRegex).MatchString(email)
 }
 
 func GetContactByID(db *sql.DB, id int) {
 	// Implementation for getting a contact by ID
 	query := "SELECT * FROM contact WHERE id = ?"
-	
+
 	row := db.QueryRow(query, id)
 	contact := models.Contact{}
 
 	var valueEmail sql.NullString
-	
+
 	err := row.Scan(&contact.ID, &contact.Name, &valueEmail, &contact.Phone)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -57,7 +71,7 @@ func GetContactByID(db *sql.DB, id int) {
 		}
 		log.Fatal("Could not scan row:", err)
 	}
-	
+
 	if valueEmail.Valid {
 		contact.Email = valueEmail.String
 	} else {
@@ -71,7 +85,7 @@ func GetContactByID(db *sql.DB, id int) {
 func CreateContact(db *sql.DB, contact models.Contact) error {
 	// Implementation for creating a new contact
 	query := "INSERT INTO contact (name, email, phone) VALUES (?, ?, ?)"
-	
+
 	_, err := db.Exec(query, contact.Name, contact.Email, contact.Phone)
 	if err != nil {
 		return fmt.Errorf("could not execute insert query: %v", err)
