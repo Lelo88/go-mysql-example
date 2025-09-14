@@ -262,3 +262,38 @@ func Test_UpdateContact(t *testing.T) {
 		require.NoError(t, err, "there were unfulfilled expectations")
 	})
 }
+
+func Test_DeleteContact(t *testing.T) {
+	t.Run("Successful Deletion", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		mock.ExpectExec(`^DELETE FROM contact WHERE id = \?$`).
+			WithArgs(1).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err = DeleteContact(db, 1)
+		require.NoError(t, err, "unexpected error")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
+	})
+
+	t.Run("Deletion Error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		mock.ExpectExec(`^DELETE FROM contact WHERE id = \?$`).
+			WithArgs(1).
+			WillReturnError(errors.New("deletion error"))
+
+		err = DeleteContact(db, 1)
+		require.Error(t, err, "expected an error but got none")
+		require.EqualError(t, err, "could not execute delete query: deletion error", "unexpected error message")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
+	})
+}
