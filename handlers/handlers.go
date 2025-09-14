@@ -96,15 +96,16 @@ func CreateContact(db *sql.DB, contact models.Contact) error {
 	return nil
 }
 
-func UpdateContact(db *sql.DB, contact models.Contact) {
+func UpdateContact(db *sql.DB, contact models.Contact) error {
 	query := "UPDATE contact SET name = ?, email = ?, phone = ? WHERE id = ?"
 
 	_, err := db.Exec(query, contact.Name, contact.Email, contact.Phone, contact.ID)
 	if err != nil {
-		log.Fatal("Could not execute update query:", err)
+		return fmt.Errorf("could not execute update query: %w", err)
 	}
 
 	fmt.Println("Contact updated successfully!")
+	return nil
 }
 
 func DeleteContact(db *sql.DB, id int) {
