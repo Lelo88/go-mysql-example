@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -14,7 +15,9 @@ import (
 )
 
 func main() {
-	db, err := database.Connect()
+	db, err := database.Connect(func(driverName, dataSourceName string) (*sql.DB, error) {
+		return sql.Open(driverName, dataSourceName)
+	}, ".env")
 	if err != nil {
 		log.Fatal("Could not connect to the database:", err)
 	}
@@ -27,7 +30,7 @@ func main() {
 	handlers.GetContactByID(db, 1)
 
 	fmt.Println("-----") */
-	
+
 	/* newContact := models.Contact{
 		Name:  "John Doe",
 		Email: "",
@@ -69,7 +72,7 @@ func main() {
 			fmt.Println("Invalid input, please enter a number.")
 			continue
 		}
-		
+
 		switch choice {
 		case 1:
 			handlers.ListContacts(db)
