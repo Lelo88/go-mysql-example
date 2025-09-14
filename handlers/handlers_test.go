@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/Lelo88/go-mysql-example/models"
 	"github.com/stretchr/testify/require"
 )
 
@@ -163,5 +164,52 @@ func TestGetContactByID(t *testing.T) {
 
 		err = GetContactByID(db, 1)
 		require.Error(t, err, "expected an error but got none")
+	})
+}
+
+func Test_CreateContact(t *testing.T) {
+	t.Run("Successful Insertion", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		contact := models.Contact{
+			Name:  "John Doe",
+			Email: "john.doe@example.com",
+			Phone: "123-456-7890",
+		}
+		
+		mock.ExpectExec("INSERT INTO contact \\(name, email, phone\\) VALUES \\(\\?, \\?, \\?\\)").
+			WithArgs(contact.Name, contact.Email, contact.Phone).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err = CreateContact(db, contact)
+		require.NoError(t, err, "unexpected error")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
+	})
+
+	t.Run("Insertion Error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		contact := models.Contact{
+			Name:  "John Doe",
+			Email: "john.doe@example.com",		
+			Phone: "123-456-7890",
+		}
+
+		mock.ExpectExec("INSERT INTO contact \\(name, email, phone\\) VALUES \\(\\?, \\?, \\?\\)").
+			WithArgs(contact.Name, contact.Email, contact.Phone).
+			WillReturnError(errors.New("insertion error"))
+
+		err = CreateContact(db, contact)
+		require.Error(t, err, "expected an error but got none")
+		require.EqualError(t, err, "could not execute insert query: insertion error", "unexpected error message")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
 	})
 }
