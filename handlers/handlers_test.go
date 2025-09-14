@@ -213,3 +213,52 @@ func Test_CreateContact(t *testing.T) {
 		require.NoError(t, err, "there were unfulfilled expectations")
 	})
 }
+
+func Test_UpdateContact(t *testing.T) {
+	t.Run("Successful Update", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		contact := models.Contact{
+			ID:    1,
+			Name:  "Jane Doe",
+			Email: "jane.doe@example.com",
+			Phone: "098-765-4321",
+		}
+
+		mock.ExpectExec(`^UPDATE contact SET name = \?, email = \?, phone = \? WHERE id = \?$`).
+			WithArgs(contact.Name, contact.Email, contact.Phone, contact.ID).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err = UpdateContact(db, contact)
+		require.NoError(t, err, "unexpected error")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
+	})
+
+	t.Run("Update Error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		require.NoError(t, err, "An error was not expected when opening a stub database connection")
+		defer db.Close()
+
+		contact := models.Contact{
+			ID:    1,
+			Name:  "Jane Doe",
+			Email: "jane.doe@example.com",
+			Phone: "098-765-4321",
+		}
+
+		mock.ExpectExec(`^UPDATE contact SET name = \?, email = \?, phone = \? WHERE id = \?$`).
+			WithArgs(contact.Name, contact.Email, contact.Phone, contact.ID).
+			WillReturnError(errors.New("update error"))
+
+		err = UpdateContact(db, contact)
+		require.Error(t, err, "expected an error but got none")
+		require.EqualError(t, err, "could not execute update query: update error", "unexpected error message")
+
+		err = mock.ExpectationsWereMet()
+		require.NoError(t, err, "there were unfulfilled expectations")
+	})
+}
